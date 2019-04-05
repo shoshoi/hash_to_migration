@@ -18,20 +18,12 @@ module HashToMigration
     later_eval = {}
 
     model["columns"] = hash.map do |key,value|
-      case value
-      when Hash
-        later_eval[key] = Hash
-        build_column_string("Integer", key)
-      when Array
-        if value.first.class == Hash
-          later_eval[key] = Array
-          build_column_string("Integer", "#{key}_id")
-        else
-          build_column_string("Array", key)
-        end
+      if value.class == Hash || value.class == Array && value.first.class == Hash
+        later_eval[key] = value.class
+        build_column_string(Integer, "#{key}_id")
       else
-        class_name = self.date_text?(value) ? "Date" : value.class.to_s
-        build_column_string(class_name, key)
+        klass = self.date_text?(value) ? Date : value.class
+        build_column_string(klass, key)
       end
     end
 
@@ -45,9 +37,9 @@ module HashToMigration
     models.flatten
   end
 
-  def self.build_column_string(class_name, column_name)
+  def self.build_column_string(klass, column_name)
     attribute = @@yaml["attributes"].select do |attribute|
-      class_name == attribute["rb_attr"]
+      klass.to_s == attribute["rb_attr"]
     end.first
     "t.#{attribute["db_attr"]} :#{column_name.to_s.underscore}"
   end
