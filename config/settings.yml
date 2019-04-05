@@ -15,7 +15,8 @@ attributes:
     db_attr: boolean
   - rb_attr: FalseClass
     db_attr: boolean
-
+  - rb_attr: Array
+    db_attr: binary
 #string : 文字列
 #text : 長い文字列
 #integer : 整数

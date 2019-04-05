@@ -5,76 +5,76 @@ require 'active_support/core_ext'
 
 module HashToMigration
   @@yaml = YAML.load_file("./config/settings.yml")
-  @@models = {}
 
   def self.generate(hash,name)
     models = get_models(hash, name)
     generate_files(models)
   end
 
+  private
   def self.get_models(hash,name="top")
     name = name.singularize || name
-    yaml = @@yaml
-    model = {"name" => name, "attributes" => nil}
+    model = {"name" => name, "columns" => nil}
     later_eval = {}
-    model["attributes"] = hash.map do |key,value|
-      snake = key.to_s.underscore
+
+    model["columns"] = hash.map do |key,value|
       case value
       when Hash
         later_eval[key] = Hash
-        "t.integer :#{snake.underscore}_id"
+        build_column_string("Integer", key)
       when Array
         if value.first.class == Hash
           later_eval[key] = Array
-          "t.integer :#{snake}_id"
+          build_column_string("Integer", "#{key}_id")
         else
-          "t.binary :#{snake}"
+          build_column_string("Array", key)
         end
       else
-        if value.class.to_s == "String" && self.date_valid?(value)
-          "t.datetime :#{snake}" 
-        else
-          attribute = yaml["attributes"].select do |attribute|
-            value.class.to_s == attribute["rb_attr"]
-          end.first
-          "t.#{attribute["db_attr"]} :#{snake}"
-        end 
+        class_name = self.date_text?(value) ? "Date" : value.class.to_s
+        build_column_string(class_name, key)
       end
     end
+
     models = later_eval.map do |key,attr|
-      if attr == Hash
-        self.get_models(hash[key], key.to_s)
-      else
-        self.get_models(hash[key].first, key.to_s)
-      end
+      child = hash[key]
+      child = child.first if attr == Array
+      self.get_models(child, key.to_s)
     end
+
     models.push model
     models.flatten
   end
 
+  def self.build_column_string(class_name, column_name)
+    attribute = @@yaml["attributes"].select do |attribute|
+      class_name == attribute["rb_attr"]
+    end.first
+    "t.#{attribute["db_attr"]} :#{column_name.to_s.underscore}"
+  end
+
+  def self.date_text?(str)
+    return false unless str.class.to_s == "String"
+    !! Date.parse(str) rescue false
+  end
+
   def self.generate_files(models)
-    migration_file = File.read('template.rb')
+    template_file = File.read('template.rb')
     models.each do |model|
       class_name = "Create#{model["name"].pluralize.capitalize}"
       table_name = model["name"].pluralize
       file_name = "#{DateTime.now.strftime('%Y%m%d%H%M%S')}_create_#{table_name}.rb"
 
-      new_mig = migration_file.clone
-      new_mig.gsub!(/\$\{class_name\}/,class_name)
-      new_mig.gsub!(/\$\{table_name\}/,table_name)
+      migration_file = template_file.clone
+      migration_file.gsub!(/\$\{class_name\}/, class_name)
+      migration_file.gsub!(/\$\{table_name\}/, table_name)
 
-      model["attributes"].map! {|attribute| "      #{attribute}"}
-      attributes = model["attributes"].join("\n")
-      new_mig.gsub!(/\$\{attributes\}/,attributes)
+      columns = model["columns"].map {|columns| "      #{columns}"}.join("\n")
+      migration_file.gsub!(/\$\{columns\}/, columns)
 
       File.open("migrate/#{file_name}","w") do |file|
-        file.puts new_mig
+        file.puts migration_file
       end
     end
-  end
-
-  def self.date_valid?(str)
-    !! Date.parse(str) rescue false
   end
 end
 
