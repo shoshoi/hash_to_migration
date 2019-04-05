@@ -3,11 +3,11 @@ require 'date'
 require 'active_support'
 require 'active_support/core_ext'
 
-module MigrationGenerator
+module HashToMigration
   @@yaml = YAML.load_file("./config/settings.yml")
   @@models = {}
 
-  def self.generate_migration(hash,name)
+  def self.generate(hash,name)
     models = get_models(hash, name)
     generate_files(models)
   end
@@ -18,7 +18,7 @@ module MigrationGenerator
     model = {"name" => name, "attributes" => nil}
     later_eval = {}
     model["attributes"] = hash.map do |key,value|
-      snake = key.underscore
+      snake = key.to_s.underscore
       case value
       when Hash
         later_eval[key] = Hash

@@ -1,4 +1,4 @@
-require './migration_generator'
+require './hash_to_migration'
 hash = { 
     title: "タイトル",
     view: 10000,
@@ -14,4 +14,4 @@ hash = {
       age: 23
     }   
   }
-models = MigrationGenerator.generate_migration(hash, "movie")
+models = HashToMigration.generate(hash, "movie")
