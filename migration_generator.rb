@@ -18,25 +18,26 @@ module MigrationGenerator
     model = {"name" => name, "attributes" => nil}
     later_eval = {}
     model["attributes"] = hash.map do |key,value|
+      snake = key.underscore
       case value
       when Hash
         later_eval[key] = Hash
-        "t.integer :#{key}_id"
+        "t.integer :#{snake.underscore}_id"
       when Array
         if value.first.class == Hash
           later_eval[key] = Array
-          "t.integer :#{key}_id"
+          "t.integer :#{snake}_id"
         else
-          "t.binary :#{key}"
+          "t.binary :#{snake}"
         end
       else
         if value.class.to_s == "String" && self.date_valid?(value)
-          "t.datetime :#{key}" 
+          "t.datetime :#{snake}" 
         else
           attribute = yaml["attributes"].select do |attribute|
             value.class.to_s == attribute["rb_attr"]
           end.first
-          "t.#{attribute["db_attr"]} :#{key}"
+          "t.#{attribute["db_attr"]} :#{snake}"
         end 
       end
     end
