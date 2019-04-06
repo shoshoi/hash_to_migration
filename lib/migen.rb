@@ -1,3 +1,4 @@
+require "migen/version"
 require 'yaml'
 require 'date'
 require 'time'
@@ -5,6 +6,8 @@ require 'active_support'
 require 'active_support/core_ext'
 
 module Migen
+  class Error < StandardError; end
+
   def self.date_text?(str)
     return false unless str.class.to_s == "String"
     !! Date.parse(str) rescue false
@@ -23,13 +26,19 @@ module Migen
   end
 
   class Mighash < Hash
-    def initialize(hash, hash_name="parent")
-      @hash_name = hash_name
+    def initialize(hash={}, name="parent")
+      @name = name
       self.merge!(hash)
     end
 
-    def get_models(hash=self, name=@hash_name)
+    def name
+      @name
+    end
+
+    def get_models(hash=self, name=@name)
       hash = hash.to_h if hash.class != Hash
+      return [] if hash.keys.count == 0
+
       name = name.singularize || name
       model = Model.new(name)
       later_eval = {}
@@ -59,6 +68,10 @@ module Migen
     def mig
       get_models.map {|model| model.mig }
     end
+
+    def inspect
+      "name: #{@name}, hash: #{super}"
+    end
   end
 
   class Model
@@ -80,6 +93,7 @@ module Migen
     end
 
     def mig 
+      return "" if columns.count == 0
       template_file = File.read('template.rb')
       migration_file = template_file.clone
       migration_file.gsub!(/\$\{class_name\}/, class_name)
