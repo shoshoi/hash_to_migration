@@ -1,3 +1,4 @@
+require 'fileutils'
 test_data = { 
     title: "タイトル",
     view: 10000,
@@ -120,6 +121,10 @@ end
 
 RSpec.describe Migen::Generator do
   describe '#generate_migration_file' do
+    before do
+     FileUtils.rm_rf("migrate")
+     Dir.mkdir('migrate', 0755)
+    end
     context 'モデルが２つある場合' do
       before do
         @hash = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie")
@@ -134,10 +139,10 @@ RSpec.describe Migen::Generator do
       before do
         @model = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie").get_models.first
       end 
-      it "ファイルが２つ出力されること" do
+      it "ファイルが１つ出力されること" do
         Migen::Generator.generate_migration_file(@model)
         count = Pathname.glob("./migrate/*").count
-        expect(count).to eq(2)
+        expect(count).to eq(1)
       end
     end
     context '引数がHash' do
