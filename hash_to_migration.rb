@@ -1,5 +1,6 @@
 require 'yaml'
 require 'date'
+require 'time'
 require 'active_support'
 require 'active_support/core_ext'
 
@@ -51,10 +52,16 @@ module HashToMigration
 
   def self.generate_files(models)
     template_file = File.read('template.rb')
+
     models.each do |model|
       class_name = "Create#{model["name"].pluralize.capitalize}"
       table_name = model["name"].pluralize
-      file_name = "#{DateTime.now.strftime('%Y%m%d%H%M%S')}_create_#{table_name}.rb"
+      file_name = "#{get_timestamp}_create_#{table_name}.rb"
+
+      if table_duplicate?(table_name)
+        puts "error: duplicate table #{table_name}"
+        next
+      end
 
       migration_file = template_file.clone
       migration_file.gsub!(/\$\{class_name\}/, class_name)
@@ -67,6 +74,36 @@ module HashToMigration
         file.puts migration_file
       end
     end
+  end
+
+  def self.get_timestamp
+    start_time = Time.now
+    time = start_time
+    timestamp = time.strftime("%Y%m%d%H%M%S")
+
+    while timestamp_duplicate?(timestamp)
+      if time - start_time >= 10
+        puts "fatal: The timestamp has been duplicated 10 times"
+      else
+        puts "error: duplicate timestamp #{timestamp}"
+      end
+      time += 1
+      timestamp = time.strftime("%Y%m%d%H%M%S")
+    end
+
+    timestamp
+  end
+
+  def self.timestamp_duplicate?(timestamp)
+    path = "./migrate/*"
+    time_stamps = Pathname.glob(path).map {|path| path.basename.to_s[0,14]}
+    time_stamps.include?(timestamp)
+  end
+
+  def self.table_duplicate?(table_name)
+    path = "./migrate/*"
+    tables = Pathname.glob(path).map {|path| path.basename.to_s[22..-1].gsub(/\.rb/, "")}
+    tables.include?(table_name)
   end
 end
 
