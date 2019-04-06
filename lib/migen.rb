@@ -5,6 +5,8 @@ require 'time'
 require 'active_support'
 require 'active_support/core_ext'
 
+require_relative 'settings'
+
 module Migen
   class Error < StandardError; end
 
@@ -107,7 +109,7 @@ module Migen
   end
 
   class Column
-    @@yaml = YAML.load_file("./config/settings.yml")
+    @@attributes = Settings.attributes
 
     def initialize(name, klass)
       @name = name
@@ -126,17 +128,16 @@ module Migen
     end
 
     def mig
-      attribute = @@yaml["attributes"].select do |attribute|
-        @klass.to_s == attribute["rb_attr"]
+
+      attribute = @@attributes.select do |attribute|
+        @klass.to_s == attribute[:rb_attr].to_s
       end.first
       options = @options.select{|key,value| value}.map {|key,value| ", #{key.to_s}: #{value}"}.join
-      "t.#{attribute["db_attr"]} :#{@name.to_s.underscore} #{options}"
+      "t.#{attribute[:db_attr]} :#{@name.to_s.underscore} #{options}"
     end
   end
 
   module Generator
-    @@yaml = YAML.load_file("./config/settings.yml")
-
     def self.generate_migration_file(models)
       case models
       when Migen::Mighash
