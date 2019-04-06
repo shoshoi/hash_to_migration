@@ -6,6 +6,7 @@ require 'active_support'
 require 'active_support/core_ext'
 
 require_relative 'settings'
+require_relative 'templates'
 
 module Migen
   class Error < StandardError; end
@@ -99,7 +100,7 @@ module Migen
 
     def mig 
       return "" if columns.count == 0
-      template_file = File.read('template.rb')
+      template_file = Templates.migration_file
       migration_file = template_file.clone
       migration_file.gsub!(/\$\{class_name\}/, class_name)
       migration_file.gsub!(/\$\{table_name\}/, table_name)
