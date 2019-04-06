@@ -25,6 +25,12 @@ module Migen
     tables.include?(table_name)
   end
 
+  class ModelList < Array
+    def mig 
+      self.map {|model| model.mig }
+    end    
+  end
+
   class Mighash < Hash
     def initialize(hash={}, name="parent")
       @name = name
@@ -37,7 +43,7 @@ module Migen
 
     def get_models(hash=self, name=@name)
       hash = hash.to_h if hash.class != Hash
-      return [] if hash.keys.count == 0
+      return ModelList.new if hash.keys.count == 0
 
       name = name.singularize || name
       model = Model.new(name)
@@ -60,13 +66,9 @@ module Migen
         child = child.first if attr == Array
         self.get_models(child, key.to_s)
       end
-
       models.push model
-      models.flatten
-    end
-
-    def mig
-      get_models.map {|model| model.mig }
+      models.flatten!
+      ModelList.new(models)
     end
 
     def inspect

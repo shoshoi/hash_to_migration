@@ -58,6 +58,31 @@ RSpec.describe Migen do
       it "名前が設定されること" do
         expect(@hash.get_models.count).to eq(1)
       end 
+    end
+    context '子がハッシュの場合' do
+      before do
+        @hash = Migen::Mighash.new({title: "タイトル", author: { name: "作成者" }}, "movie")
+      end 
+      it "名前が設定されること" do
+        expect(@hash.get_models.count).to eq(2)
+        expect(@hash.get_models.count).to eq(2)
+      end 
+    end
+    context '子が配列の場合' do
+      before do
+        @hash = Migen::Mighash.new({title: "タイトル", tags: ["tag1", "tag2"]}, "movie")
+      end 
+      it "名前が設定されること" do
+        expect(@hash.get_models.count).to eq(1)
+      end 
+    end
+    context '子が配列で、配列の中身がハッシュの場合' do
+      before do
+        @hash = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie")
+      end 
+      it "名前が設定されること" do
+        expect(@hash.get_models.count).to eq(2)
+      end 
     end 
   end
 
@@ -67,7 +92,7 @@ RSpec.describe Migen do
         @hash = Migen::Mighash.new
       end
       it "空の配列となること" do
-        expect(@hash.mig).to eq([])
+        expect(@hash.get_models.mig).to eq([])
       end
     end
     context 'ハッシュが設定されている場合' do
@@ -75,8 +100,8 @@ RSpec.describe Migen do
         @hash = Migen::Mighash.new({title: "タイトル"}, "movie")
       end
       it "migrationファイルのテキストが表示されること" do
-        expect(@hash.mig.count).to eq(1)
-        expect(@hash.mig.first).to eq(%Q(class Movies < ActiveRecord::Migration[5.0]\n  def change\n    create_table :movies do |t|\n      t.string :title \n\n      t.timestamps\n    end\n  end\nend\n))
+        expect(@hash.get_models.mig.count).to eq(1)
+        expect(@hash.get_models.mig.first).to eq(%Q(class Movies < ActiveRecord::Migration[5.0]\n  def change\n    create_table :movies do |t|\n      t.string :title \n\n      t.timestamps\n    end\n  end\nend\n))
       end
     end 
   end
