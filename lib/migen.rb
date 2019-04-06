@@ -66,6 +66,7 @@ module Migen
         child = child.first if attr == Array
         self.get_models(child, key.to_s)
       end
+
       models.push model
       models.flatten!
       ModelList.new(models)
