@@ -117,3 +117,38 @@ RSpec.describe Migen do
     end
   end
 end
+
+RSpec.describe Migen::Generator do
+  describe '#generate_migration_file' do
+    context 'モデルが２つある場合' do
+      before do
+        @hash = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie")
+      end 
+      it "ファイルが２つ出力されること" do
+        Migen::Generator.generate_migration_file(@hash)
+        count = Pathname.glob("./migrate/*").count
+        expect(count).to eq(2)
+      end 
+    end
+    context '引数がModel' do
+      before do
+        @model = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie").get_models.first
+      end 
+      it "ファイルが２つ出力されること" do
+        Migen::Generator.generate_migration_file(@model)
+        count = Pathname.glob("./migrate/*").count
+        expect(count).to eq(2)
+      end
+    end
+    context '引数がHash' do
+      before do
+        @hash = {title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}
+      end 
+      it "ファイルが２つ出力されること" do
+        Migen::Generator.generate_migration_file(@hash)
+        count = Pathname.glob("./migrate/*").count
+        expect(count).to eq(2)
+      end 
+    end
+  end
+end 

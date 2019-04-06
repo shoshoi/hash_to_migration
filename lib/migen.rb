@@ -146,7 +146,7 @@ module Migen
       when Migen::Model
         models = [models]
       when Hash
-        models = Migen::MigHash.new(models).get_models
+        models = Migen::Mighash.new(models).get_models
       end
       models.each do |model|
         file_name = "#{get_timestamp}_create_#{model.table_name}.rb"
