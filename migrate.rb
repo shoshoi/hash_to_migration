@@ -14,5 +14,5 @@ hash = {
       age: 23
     }   
   }
-models = MigGen::Generator.get_models(hash, "movie")
-MigGen::Generator.generate_migration_file(models)
+hash = Migen::Mighash.new(hash, "movie")
+Migen::Generator.generate_migration_file(hash)
