@@ -1,19 +1,3 @@
-require 'fileutils'
-test_data = { 
-    title: "タイトル",
-    view: 10000,
-    liked: true,
-    display: false,
-    date: "2019-10-16",
-    comments: [
-      { name: "匿名", comment: "いいね"},
-      { name: "匿名2", comment: "いいね2"},
-    ],  
-    user: {
-      user_name: "namae",
-      age: 23
-    }   
-  }
 RSpec.describe Migen do
   it "has a version number" do
     expect(Migen::VERSION).not_to be nil
@@ -118,42 +102,3 @@ RSpec.describe Migen do
     end
   end
 end
-
-RSpec.describe Migen::Generator do
-  describe '#generate_migration_file' do
-    before do
-     FileUtils.rm_rf("migrate")
-     Dir.mkdir('migrate', 0755)
-    end
-    context 'モデルが２つある場合' do
-      before do
-        @hash = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie")
-      end 
-      it "ファイルが２つ出力されること" do
-        Migen::Generator.generate_migration_file(@hash)
-        count = Pathname.glob("./migrate/*").count
-        expect(count).to eq(2)
-      end 
-    end
-    context '引数がModel' do
-      before do
-        @model = Migen::Mighash.new({title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}, "movie").get_models.first
-      end 
-      it "ファイルが１つ出力されること" do
-        Migen::Generator.generate_migration_file(@model)
-        count = Pathname.glob("./migrate/*").count
-        expect(count).to eq(1)
-      end
-    end
-    context '引数がHash' do
-      before do
-        @hash = {title: "タイトル", comments: [{comment: "コメント", name: "名前"}]}
-      end 
-      it "ファイルが２つ出力されること" do
-        Migen::Generator.generate_migration_file(@hash)
-        count = Pathname.glob("./migrate/*").count
-        expect(count).to eq(2)
-      end 
-    end
-  end
-end 

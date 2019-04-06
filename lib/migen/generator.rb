@@ -31,7 +31,8 @@ module Migen
 
       while Migen::Validator.timestamp_duplicate?(timestamp)
         if time - start_time >= 10
-          puts "fatal: The timestamp has been duplicated 10 times"
+          puts "fatal: The timestamp has been duplicated 10 times."
+          raise Exception.new("fatal: The timestamp has been duplicated 10 times.")
         else
           puts "error: duplicate timestamp #{timestamp}"
         end
