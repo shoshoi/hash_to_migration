@@ -1,6 +1,6 @@
 module Migen
   class Column
-    @@attributes = Settings.attributes
+    @@yaml = YAML.load_file(File.expand_path('../settings.yml', __FILE__))
 
     def initialize(name, klass)
       @name = name
@@ -19,11 +19,11 @@ module Migen
     end
 
     def mig
-      attribute = @@attributes.select do |attribute|
-        @klass.to_s == attribute[:rb_attr].to_s
+      attribute = @@yaml["attributes"].select do |attribute|
+        @klass.to_s == attribute["rb_attr"].to_s
       end.first
       options = @options.select{|key,value| value}.map {|key,value| ", #{key.to_s}: #{value}"}.join
-      "t.#{attribute[:db_attr]} :#{@name.to_s.underscore} #{options}"
+      "t.#{attribute["db_attr"]} :#{@name.to_s.underscore} #{options}"
     end
   end
 end

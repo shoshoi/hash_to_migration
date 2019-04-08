@@ -86,7 +86,7 @@ RSpec.describe Migen do
       end
       it "migrationファイルのテキストが表示されること" do
         expect(@hash.get_models.mig.count).to eq(1)
-        expect(@hash.get_models.mig.first).to eq(%Q(class Movies < ActiveRecord::Migration[5.0]\n  def change\n    create_table :movies do |t|\n      t.string :title \n\n      t.timestamps\n    end\n  end\nend\n))
+        expect(@hash.get_models.mig.first).to eq(%Q(class CreateMovies < ActiveRecord::Migration[5.0]\n  def change\n    create_table :movies do |t|\n      t.string :title \n\n      t.timestamps\n    end\n  end\nend\n))
       end
     end 
   end

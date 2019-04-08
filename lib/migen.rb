@@ -4,8 +4,6 @@ require 'time'
 require 'active_support'
 require 'active_support/core_ext'
 
-require_relative 'settings'
-require_relative 'templates'
 require_relative 'migen/mighash.rb'
 require_relative 'migen/model.rb'
 require_relative 'migen/column.rb'

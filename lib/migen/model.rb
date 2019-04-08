@@ -19,7 +19,8 @@ module Migen
 
     def mig 
       return "" if columns.count == 0
-      template_file = Templates.migration_file
+      path = File.expand_path('../template.rb', __FILE__)
+      template_file = File.read(path)
       migration_file = template_file.clone
       migration_file.gsub!(/\$\{class_name\}/, class_name)
       migration_file.gsub!(/\$\{table_name\}/, table_name)

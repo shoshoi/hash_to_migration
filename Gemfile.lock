@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    migen (0.1.1)
+    migen (0.1.2)
+      activesupport (~> 5.2)
 
 GEM
   remote: https://rubygems.org/
