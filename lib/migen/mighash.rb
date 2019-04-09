@@ -1,47 +1,49 @@
 module Migen
   class Mighash < Hash
-    def initialize(hash={}, name="parent")
-      @name = name
+    def initialize(hash={}, top_model_name="top")
+      @top_model_name = top_model_name
       self.merge!(hash)
     end
 
-    def name
-      @name
+    def top_model_name
+      @top_model_name
     end
 
-    def get_models(hash=self, name=@name)
+    def get_models(hash=self, model_name=@top_model_name)
       hash = hash.to_h if hash.class != Hash
       return ModelList.new if hash.keys.count == 0
 
-      name = name.singularize || name
-      model = Model.new(name)
-      later_eval = {}
+      model_name = model_name.singularize || model_name
+      current_model = Model.new(model_name)
+      later_eval_columns = []
 
       columns = hash.map do |key,value|
         if value.class == Hash || value.class == Array && value.first.class == Hash
-          later_eval[key] = value.class
+          later_eval_columns.push key
           Column.new("#{key}_id", Integer)
         else
           klass = Migen::Validator.date_text?(value) ? Date : value.class
           Column.new(key, klass)
         end
       end
-      model.columns.push columns
-      model.columns.flatten!
+      current_model.columns.push columns
+      current_model.columns.flatten!
 
-      models = later_eval.map do |key,attr|
-        child = hash[key]
-        child = child.first if attr == Array
-        self.get_models(child, key.to_s)
+      related_models = later_eval_columns.map do |key|
+        if hash[key].class == Array
+          value = hash[key][0]
+        else
+          value = hash[key]
+        end
+        self.get_models(value, key.to_s)
       end
 
-      models.push model
-      models.flatten!
-      ModelList.new(models)
+      all_models = [current_model, related_models].flatten
+      ModelList.new(all_models)
     end
 
     def inspect
-      "name: #{@name}, hash: #{super}"
+      "top_model_name: #{@top_model_name}, hash: #{super}"
     end
   end
 end

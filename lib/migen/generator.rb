@@ -1,13 +1,15 @@
 module Migen
   module Generator
-    def self.generate_migration_file(models)
-      case models
+    def self.generate_migration_file(object)
+      case object
       when Migen::Mighash
-        models = models.get_models
+        models = object.get_models
       when Migen::Model
-        models = [models]
+        models = [object]
       when Hash
-        models = Migen::Mighash.new(models).get_models
+        models = Migen::Mighash.new(object).get_models
+      else
+        raise Exception.new("fatal: Other than  Migen::Mighash, Migen::Model, Hash can not be specifie.")
       end
       models.each do |model|
         file_name = "#{get_timestamp}_create_#{model.table_name}.rb"
@@ -26,18 +28,18 @@ module Migen
     private
     def self.get_timestamp
       start_time = Time.now
-      time = start_time
-      timestamp = time.strftime("%Y%m%d%H%M%S")
+      current_time = start_time
+      timestamp = current_time.strftime("%Y%m%d%H%M%S")
 
       while Migen::Validator.timestamp_duplicate?(timestamp)
-        if time - start_time >= 10
+        if current_time - start_time >= 10
           puts "fatal: The timestamp has been duplicated 10 times."
           raise Exception.new("fatal: The timestamp has been duplicated 10 times.")
         else
           puts "error: duplicate timestamp #{timestamp}"
         end
-        time += 1
-        timestamp = time.strftime("%Y%m%d%H%M%S")
+        current_time += 1
+        timestamp = current_time.strftime("%Y%m%d%H%M%S")
       end
 
       timestamp

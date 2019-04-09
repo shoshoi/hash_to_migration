@@ -7,8 +7,8 @@ RSpec.describe Migen do
       before do
         @hash = Migen::Mighash.new
       end
-      it "名前が'parent'であること" do
-        expect(@hash.name).to eq("parent")
+      it "名前が'top'であること" do
+        expect(@hash.top_model_name).to eq("top")
       end
       it "ハッシュが空であること" do
         expect(@hash).to eq({})
@@ -19,7 +19,7 @@ RSpec.describe Migen do
         @hash = Migen::Mighash.new({title: "タイトル"}, "movie")
       end 
       it "名前が設定されること" do
-        expect(@hash.name).to eq("movie")
+        expect(@hash.top_model_name).to eq("movie")
       end 
       it "ハッシュが設定されること" do
         expect(@hash).to eq({title: "タイトル"})
@@ -97,7 +97,7 @@ RSpec.describe Migen do
         @hash = Migen::Mighash.new({title: "タイトル"}, "movie")
       end
       it "名前とhashの中身が表示されること" do
-        expect(@hash.inspect).to eq("name: movie, hash: {:title=>\"タイトル\"}")
+        expect(@hash.inspect).to eq("top_model_name: movie, hash: {:title=>\"タイトル\"}")
       end
     end
   end

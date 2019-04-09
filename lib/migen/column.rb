@@ -1,10 +1,10 @@
 module Migen
   class Column
-    @@yaml = YAML.load_file(File.expand_path('../settings.yml', __FILE__))
+    @@settings = YAML.load_file(File.expand_path('../settings.yml', __FILE__))
 
     def initialize(name, klass)
       @name = name
-      @klass = klass
+      @attribute = @@settings["attr_mapping"][klass.to_s]
       @options = {
         limit: nil,
         default: nil,
@@ -19,11 +19,9 @@ module Migen
     end
 
     def mig
-      attribute = @@yaml["attributes"].select do |attribute|
-        @klass.to_s == attribute["rb_attr"].to_s
-      end.first
-      options = @options.select{|key,value| value}.map {|key,value| ", #{key.to_s}: #{value}"}.join
-      "t.#{attribute["db_attr"]} :#{@name.to_s.underscore} #{options}"
+      valid_options = @options.select{|key,value| value.present? }
+      formatted_option = valid_options.map {|key,value| ", #{key.to_s}: #{value}" }.join
+      "t.#{@attribute} :#{@name.to_s.underscore} #{formatted_option}"
     end
   end
 end
